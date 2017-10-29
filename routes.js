@@ -8,7 +8,7 @@ module.exports = function (app,passport,io){
 	
 	app.get('/', function (req, res) {		
 		
-		
+		require('/.socketEvents.js').updateSocketUser(req,socket,db);
 		
 		res.render('home')		
 		
@@ -24,16 +24,16 @@ module.exports = function (app,passport,io){
 	
 	app.get('/roomplay', function (req, res) {
 		
-		socket.on('connection',function(s){
-			console.log(req.user);
-			console.log(s.id)
-			var collection = db.get().collection('user');
-			
-			collection.update({facebook_id:req.user.facebook_id},{$set:{socket:s.id}});
+		require('/.socketEvents.js').updateSocketUser(req,socket,db);
+
+		if(req.user!=undefined){
+			name = req.user.facebook_name;
+		}else{
+			name = 'guest';
+		}
 			res.render('roomPlay',{
-			user : req.user.facebook_name // get the user out of session and pass to template
+			user : name// get the user out of session and pass to template
 		});	
-		});
 		
 		
 	});
