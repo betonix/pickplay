@@ -2,14 +2,17 @@ var db = require('./db.js');
 //var config = require('./oauth.js');
 var User = require('./user.js');
 var socket = require('./socketEvents.js').socket();
+//require('./ioEvents.js')(socket);
+
 
 module.exports = function (app,passport,io){	
 	
 	
-	app.get('/', function (req, res) {		
+	app.get('/', function (req, res) {	
+	
+		req.session.userId = 254
 		
-		require('/.socketEvents.js').updateSocketUser(req,socket,db);
-		
+		//util.updateSocketUser(req,socket,db);	
 		res.render('home')		
 		
 	});
@@ -22,17 +25,31 @@ module.exports = function (app,passport,io){
 		res.redirect('/');
 	});
 	
-	app.get('/roomplay', function (req, res) {
+	app.get('/roomplay/:room', function (req, res) {
 		
-		require('/.socketEvents.js').updateSocketUser(req,socket,db);
+		room = req.params.room
+		o = new Object();
+		
+		req.session.userId = 254
+		
+		o.name = "guest";
+		o.points = 35;
 
+
+		//util.joinRoom(o,room,socket,db,function(){
+			
+			
+		//});
+				
+		console.log(socket)
+		
 		if(req.user!=undefined){
 			name = req.user.facebook_name;
 		}else{
 			name = 'guest';
 		}
 			res.render('roomPlay',{
-			user : name// get the user out of session and pass to template
+			user : name
 		});	
 		
 		

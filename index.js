@@ -1,4 +1,4 @@
-const KEY = 'name-cookie';
+const KEY = 'connect.sid';
 const SECRET = 'chace-secreta';
 const dbMovieApi = '1867f61baa228323cefe3f8697601a0f'
 
@@ -58,6 +58,7 @@ db.connect(function(err){
 	}
 	
 });
+require('./ioEvents.js')(io,store);
 require('./socketEvents.js').init(io);
 require('./authenticate.js')(passport);
 require('./routes.js')(app,passport);

@@ -1,1 +1,27 @@
+ <!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>PickPlay</title>
+</head>
+
+<body>
 room play
+</body>
+
+</html> 
+
+<script src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.0.3/socket.io.js"></script>
+<script src="https://code.jquery.com/jquery-3.2.1.js" integrity="sha256-DZAnKJ/6XZ9si04Hgrsxu/8s717jcIzLy3oi35EouyE=crossorigin="anonymous"></script>
+
+<script type="text/javascript">
+  socket = io('localhost:3000',{
+    'reconnection': true,
+    'reconnectionDelay': 50000,
+    'reconnectionAttempts': 10
+  });
+
+
+
+</script>
