@@ -9,10 +9,14 @@ module.exports = function (app,passport,io){
 	
 	
 	app.get('/', function (req, res) {	
-	
-		req.session.userId = 254
 		
-		//util.updateSocketUser(req,socket,db);	
+		if(req.user!=undefined){
+			req.session.user = req.user;
+			
+		}else{
+			req.session.user = {name:'guest'}
+		}
+		
 		res.render('home')		
 		
 	});
@@ -28,33 +32,31 @@ module.exports = function (app,passport,io){
 	app.get('/roomplay/:room', function (req, res) {
 		
 		room = req.params.room
-		o = new Object();
-		
-		req.session.userId = 254
-		
-		o.name = "guest";
-		o.points = 35;
+		user={};
+		user.name = 'guest'			
+		user.room = room;		
+		var collection = db.get().collection('rooms');
+		numeroPlay = 0;
+		collection.find({room:room}).toArray(function(err, result){
 
-
-		//util.joinRoom(o,room,socket,db,function(){
-			
-			
-		//});
+			if(req.user!=undefined){
 				
-		console.log(socket)
-		
-		if(req.user!=undefined){
-			name = req.user.facebook_name;
-		}else{
-			name = 'guest';
-		}
+			user.name = req.user.facebook_name;
+			user.facebook_id = req.user.facebook_id;
+			req.session.user = user
+			
+			}else{
+				user.name = namePlay(result,'Anônimo');
+				req.session.user = user
+			}
+			
 			res.render('roomPlay',{
-			user : name
+			user
 		});	
 		
+		});	
 		
-	});
-	
+	});	
 	
 }
 
@@ -67,3 +69,21 @@ function isLoggedIn(req, res, next) {
 	// if they aren't redirect them to the home page
 	res.redirect('/');
 }
+
+function namePlay(room,nomeInRoom){
+
+  for (var i = room.length - 1; i >= 0; i--) {
+
+    if(room[i].name == nomeInRoom){  
+    numero = '('+numeroPlay+')'
+    nomeInRoom = "Anônimo"+numero;
+    numeroPlay +=1 
+    return namePlay(room,nomeInRoom);
+
+	}
+  }
+ numeroPlay = 0 
+ return nomeInRoom 
+}
+
+
