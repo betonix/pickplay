@@ -43,9 +43,22 @@ module.exports = {
 		
 	},
 	
-	getMovie : function (pag){
-		getAllMovies (pag);
+	getMovie : function (done){
+		var collection = db.get().collection('movies');
+		collection.aggregate({$sample:{size:1}},(function(err,result){
+			done(result[0]);
+		}));
+	},
+	
+	sendMovie : function(socket,movie){	
+		socket.emit("joinRoom",movie);
+		m = {}
+		m.title = movie.title;
+		m.timeSend = new Date();
+		socket.handshake.session.movie = m;			
 	}
+	
+
 }
 function similarMovie(movie_id,url){
     
@@ -90,23 +103,12 @@ req.write("{}");
 req.end();
 }
 
-function randomPage(){
-  return Math.floor((Math.random()*100)+0);
-
-}
-
-function randomMovie(){
-  return Math.floor((Math.random()*19)+0);
-
-}
-
-
-
-
-
 
 function getAllMovies (pag) {
-	
+	console.log("pagina: "+pag);
+	if (pag==982){
+		return "fim";
+	}
 	var http = require("https");
 
 	var options = {
@@ -114,7 +116,7 @@ function getAllMovies (pag) {
 	  "hostname": "api.themoviedb.org",
 	  "port": null,
   //  "path": "/3/movie/popular?language=pt-BR&page=1&api_key="+API,
-	  "path": "/3/movie/popular?page=1&language=en-US&api_key="+API,
+	  "path": "/3/movie/popular?page="+pag+"&language=en-US&api_key="+API,
 	  "headers": {}
 	};
 
@@ -128,12 +130,16 @@ function getAllMovies (pag) {
 	  res.on("end", function () {
 		var body = Buffer.concat(chunks);
 		data = JSON.parse(body.toString());
-		
-		var collection = db.get().collection('movies');
-		for(var i = 0;i<data.results.length;i++){
-			collection.insert(data.results[i],function(){
-				console.log("gravou: "+ i)
-			});
+		if(data.results!=undefined){
+			var collection = db.get().collection('movies');
+
+			collection.insert(data.results,function(){
+				console.log("pagina " +pag+" gravada");
+				getAllMovies (pag+1);
+			})				
+			
+		}else{
+			getAllMovies (pag+1)
 		}
 			
 	  });

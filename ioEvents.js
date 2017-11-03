@@ -9,12 +9,24 @@ module.exports = function(io,sessionStore){
 		util.updateSocketUser(user,socket.id);
 		
 		socket.on("joinRoom",function(params){
-			console.log("joinn");
-			util.joinRoom(user,socket.id);
-			for(var i = 1;i<100;i++){
-				util.getMovie(i);
-			}
-
+			util.joinRoom(user,socket.id);	
+			
+			util.getMovie(function(movie){
+				util.sendMovie(socket,movie);
+			});		
+			
+		});
+		
+		socket.on("nextMovie",function(){
+		
+			receive = new Date(socket.handshake.session.movie.timeSend);					
+			send =  new Date();
+			
+			timeAnswer = (send.getTime() - receive.getTime())/1000;
+			
+			util.getMovie(function(movie){
+				util.sendMovie(socket,movie);	
+			});		
 			
 		});
 		
