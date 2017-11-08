@@ -1,0 +1,49 @@
+ <!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>PickPlay</title>
+</head>
+
+<body>
+room play
+</body>
+
+<button onclick="sendRequest()">next</button>
+
+<button onclick="responder()">responder</button>
+
+</html> 
+<script src="http://connect.facebook.net/en_US/all.js"></script>
+<script src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.0.3/socket.io.js"></script>
+<script src="https://code.jquery.com/jquery-3.2.1.js" integrity="sha256-DZAnKJ/6XZ9si04Hgrsxu/8s717jcIzLy3oi35EouyE=crossorigin="anonymous"></script>
+
+<script type="text/javascript">
+ function sendRequest() {
+ FB.init({
+        appId      : '140303243267300',
+        xfbml      : true,
+        version    : 'v2.4'
+    });
+    FB.ui({
+        method: 'apprequests',
+        message: 'Become my Buddie',
+        filters: ['app_non_users'],
+        title: 'Become my Buddie'
+    },
+    function (response) {
+        if (response && response.request_ids) {
+            //if sucess do something
+            //How many people did the user invited?
+            var $howManyInvites = String(requests).split(',').length;
+        } else {
+            //  alert('canceled');
+            return false;
+        }
+    });
+    return false;
+
+} ;
+
+</script>

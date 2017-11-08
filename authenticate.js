@@ -26,11 +26,12 @@ module.exports = function(passport) {
         clientID        : configAuth.facebookAuth.clientID,
         clientSecret    : configAuth.facebookAuth.clientSecret,
         callbackURL     : configAuth.facebookAuth.callbackURL,
+		profileFields: ['id', 'name', 'displayName', 'picture.type(large)', 'hometown', 'profileUrl', 'friends'] ,
         passReqToCallback : true // allows us to pass in the req from our route (lets us check if a user is logged in or not)
 
     },
     function(req, token, refreshToken, profile, done) {
-        
+        console.log(profile);
 		process.nextTick(function() {
 			 var collection = db.get().collection('user');
 			 
@@ -40,6 +41,8 @@ module.exports = function(passport) {
                 newUser.facebook_token = token; // we will save the token that facebook provides to the user                    
                 newUser.facebook_name  = profile.displayName // look at the passport user profile to see how names are returned	
 				newUser.socket  = null // look at the passport user profile to see how names are returned	
+				newUser.pontos = 0 ;
+				newUser.picture = profile.photos ? profile.photos[0].value : '/img/faces/unknown-user-pic.jpg',
 			 
 			 collection.find({facebook_id:profile.id}).toArray(function(err, user){
 				

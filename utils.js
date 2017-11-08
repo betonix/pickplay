@@ -30,6 +30,7 @@ module.exports = {
 	joinRoom : function (user,socketId,done){
 		var collection = db.get().collection('rooms');
 		user.socket = socketId;
+		user.pontos = 0 ;
 		collection.insert(user,function(err,result){
 			
 		});
@@ -43,25 +44,99 @@ module.exports = {
 		
 	},
 	
-	getMovie : function (done){
-		var collection = db.get().collection('movies');
-		collection.aggregate({$sample:{size:1}},(function(err,result){
-			done(result[0]);
+	getOneMovie : function (type,done){
+		idGenre  = null;
+		
+		if(type == 'terror'){
+			idGenre = 27;		
+		}else if(type == 'acao'){			
+			idGenre = 28;	
+		}else if(type == 'aventura'){
+			idGenre = 12;	
+		}else if(type == 'ficcao'){
+			idGenre = 878;
+		}else if(type == 'romance'){
+			idGenre = 10749;
+		}
+		
+		var movies = db.get().collection('movies');
+		
+		var collection = db.get().collection('moviesSend');
+		
+		/*movies.find({genre_ids : { $in : [idGenre]}}).toArray(function(err,result){
+			random = randomMovie(result.length)				
+			collection.insert({room:idGenre,number:random});
+			movie = result[random];
+			
+			mov = {}
+			mov.title = movie.title
+			mov.release = movie.release_date
+			mov.image = movie.backdrop_path
+			mov.alternativas = options(movie.similares,movie.title)
+			
+			done(mov);
+			
+		});*/
+		
+		movies.aggregate({$match: {genre_ids: {$in : [idGenre]} }},{$sample:{size:1}},(function(err,result){
+			console.log("resultado : "+result)
+			movie = result[0];
+			mov = {}
+			mov.title = movie.title
+			mov.release = movie.release_date
+			mov.image = movie.backdrop_path
+		  //mov.alternativas = options(movie.similares,movie.title)
+			
+			done(mov);			
 		}));
 	},
 	
 	sendMovie : function(socket,movie){	
-		socket.emit("joinRoom",movie);
+		
 		m = {}
-		m.title = movie.title;
+	    m.title = movie.title;
 		m.timeSend = new Date();
-		socket.handshake.session.movie = m;			
+		socket.handshake.session.movie = m;	
+		movie.title = null;
+		socket.emit("joinRoom",movie);		
+	},
+	
+	putSimilares : function(){
+		var collection = db.get().collection('movies');
+		
+		collection.find({}).toArray(function(err,result){
+			var oks = 0;
+			similarMovie(result,0,function(movie,similares){
+				collection.update({_id : movie._id},{$set:{similares : similares}});				
+			});
+			
+			
+		})
+		
+	},
+	
+	saveMovies : function(){
+		getAllMovies (1);
+	},
+	
+	sendToRoom : function(room,socket){
+		
+		var collection = db.get().collection('rooms');
+		
+		collection.find({room:room}).toArray(function(){			
+		
+		});
 	}
 	
 
 }
-function similarMovie(movie_id,url){
-    
+
+function similarMovie(result,n,done){
+if(result.length==n){
+	return""
+}	
+movie_id = result[n].id;
+
 var http = require("https");
   var options = {
   "method": "GET",
@@ -80,21 +155,9 @@ var req = http.request(options, function (res) {
 
   res.on("end", function () {
     var body = Buffer.concat(chunks);
-    var data = JSON.parse(body.toString());
-   for (var i = 0; i < 7; i++) {
-	   if(data.results=!undefined){
-       similires.push(data.results[i]);
-	   }
-   }
-    
-	var collection = db.get().collection('movies');
-	filme = {}
-	
-	filme.similares = similires;
-	filme.movie_id = movie_id;
-	filme.foto = url;
-	
-	collection.insert(filme);
+    var data = JSON.parse(body.toString()); 
+	done(result[n],data.results);
+	similarMovie(result,n+1,done);
 
   });
 });
@@ -150,10 +213,35 @@ function getAllMovies (pag) {
 	
 }
 
+function randomMovie(length){
+  return Math.floor((Math.random()*length)+0);
+
+}
 
 
+function options (movies,title){
+	similires = []
+	similires.push(title);
+	for (var i = 0; i < 6; i++) {
+	   if(movies[i]!=undefined){
+		   similires.push(movies[i].title);
+	   }
+   }
+	return shuffle(similires);
+}
 
-
+var shuffle = function( el ) {
+ var i = el.length, j, tempi, tempj;
+ if ( i == 0 ) return el;
+ while ( --i ) {
+    j       = Math.floor( Math.random() * ( i + 1 ) );
+    tempi   = el[i];
+    tempj   = el[j];
+    el[i] = tempj;
+    el[j] = tempi;
+ }
+ return el;
+}
 
 
 

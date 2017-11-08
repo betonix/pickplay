@@ -43,6 +43,7 @@ module.exports = function (app,passport,io){
 				
 			user.name = req.user.facebook_name;
 			user.facebook_id = req.user.facebook_id;
+			user.facebook_token = req.user.facebook_token;
 			req.session.user = user
 			
 			}else{

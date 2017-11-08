@@ -58,7 +58,7 @@ db.connect(function(err){
 	}
 	
 });
-require('./ioEvents.js')(io,store);
+require('./ioEvents.js')(io);
 require('./socketEvents.js').init(io);
 require('./authenticate.js')(passport);
 require('./routes.js')(app,passport);

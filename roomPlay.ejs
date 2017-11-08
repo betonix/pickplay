@@ -11,6 +11,8 @@ room play
 
 <button onclick="next()">next</button>
 
+<button onclick="responder()">responder</button>
+
 </html> 
 
 <script src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
@@ -30,9 +32,19 @@ socket.on("joinRoom",function(movie){
 	console.log(movie);
 });
 
+socket.on('getmovie',function(movie){
+console.log(movie);
+})
+
 function next(){
 
 socket.emit("nextMovie");
+
+}
+
+function responder(){
+
+socket.emit("answer");
 
 }
 
