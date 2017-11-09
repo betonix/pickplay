@@ -36,6 +36,10 @@ socket.on('getmovie',function(movie){
 console.log(movie);
 })
 
+socket.on('answer',function(pontos){
+console.log(pontos);
+})
+
 function next(){
 
 socket.emit("nextMovie");

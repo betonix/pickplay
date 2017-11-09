@@ -21,7 +21,7 @@ module.exports = function (app,passport,io){
 		
 	});
 	
-	app.get('/auth/facebook',passport.authenticate('facebook'),function(req, res){
+	app.get('/auth/facebook',passport.authenticate('facebook',{ scope: ['user_friends'] }), function(req, res){
 		
 	});
 	

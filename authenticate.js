@@ -26,12 +26,12 @@ module.exports = function(passport) {
         clientID        : configAuth.facebookAuth.clientID,
         clientSecret    : configAuth.facebookAuth.clientSecret,
         callbackURL     : configAuth.facebookAuth.callbackURL,
-		profileFields: ['id', 'name', 'displayName', 'picture.type(large)', 'hometown', 'profileUrl', 'friends'] ,
+		profileFields: ['id', 'name', 'friends','displayName', 'picture.type(large)', 'hometown', 'profileUrl'] ,
         passReqToCallback : true // allows us to pass in the req from our route (lets us check if a user is logged in or not)
 
     },
     function(req, token, refreshToken, profile, done) {
-        console.log(profile);
+        console.log(profile._json);
 		process.nextTick(function() {
 			 var collection = db.get().collection('user');
 			 
@@ -43,10 +43,13 @@ module.exports = function(passport) {
 				newUser.socket  = null // look at the passport user profile to see how names are returned	
 				newUser.pontos = 0 ;
 				newUser.picture = profile.photos ? profile.photos[0].value : '/img/faces/unknown-user-pic.jpg',
+				newUser.online = true;
 			 
 			 collection.find({facebook_id:profile.id}).toArray(function(err, user){
 				
 				if(user.length>0){					
+				
+					collection.update({facebook_id:profile.id},{$set:{friends : profile._json.friends.data,online : true}});
 					done(null, user[0]);
 					
 				}else{					

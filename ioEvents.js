@@ -16,17 +16,22 @@ module.exports = function(io){
 			})				
 		});
 
-		fb.getFbData(user.facebook_token,user.facebook_id,function(data){
+		/*fb.getFbData(user.facebook_token,user.facebook_id,function(data){
 			console.log(data);		
-		})
+		})*/
 		
 		socket.on("nextMovie",function(answer){
 		
-		eventRooms.answer(socket.handshake.session.movie.title,socket,function(result){
-			
+		eventRooms.answer(socket.handshake.session.movie.title,socket,function(result,pontos){	
+		
+
+			socket.emit('answer',pontos);
+	
+
 			util.getOneMovie('acao',function(movie){
 				util.sendMovie(socket,movie);
 				socket.to(socket.id).emit('getmovie',movie);
+				
 			})	
 			
 		})		

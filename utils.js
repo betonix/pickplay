@@ -6,7 +6,7 @@ module.exports = {
 		console.log("entrou pra atualizar")
 		if(user.facebook_id!=undefined){
 			var collection = db.get().collection('user');
-			
+			collection.update({facebook_id:user.facebook_id},{$set : {online:true}})
 			collection.update({facebook_id:user.facebook_id},{$set : {socket:socketId}},function(err,result){
 				console.log("atualizou para : " + socketId);
 				if(typeof done === "function"){
@@ -39,8 +39,10 @@ module.exports = {
 	
 	removeSocket : function (socketId){
 		var collection = db.get().collection('rooms');
-		
-		collection.remove({socket:socketId});
+		var user = db.get().collection('user');		
+		user.update({socket:socketId},{$set:{online : false}},function(){
+			collection.remove({socket:socketId});
+		});
 		
 	},
 	
@@ -107,12 +109,10 @@ module.exports = {
 		collection.find({}).toArray(function(err,result){
 			var oks = 0;
 			similarMovie(result,0,function(movie,similares){
+				
 				collection.update({_id : movie._id},{$set:{similares : similares}});				
-			});
-			
-			
+			});			
 		})
-		
 	},
 	
 	saveMovies : function(){
@@ -157,6 +157,7 @@ var req = http.request(options, function (res) {
     var body = Buffer.concat(chunks);
     var data = JSON.parse(body.toString()); 
 	done(result[n],data.results);
+	console.log("similar numero :"+ n);
 	similarMovie(result,n+1,done);
 
   });
